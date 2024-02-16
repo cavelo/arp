@@ -1,4 +1,4 @@
-// +build !linux,!windows
+//go:build !linux && !windows && !darwin
 
 // only tested on OSX
 // decided to go with exec.Command after I couldn't figure

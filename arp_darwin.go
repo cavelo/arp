@@ -1,17 +1,26 @@
-package main
+//go:build darwin
+
+// only tested on OSX
+// decided to go with exec.Command after I couldn't figure
+// out how to extract the arp cache out of the kernel with
+// golang's syscall or Sysctl()
+//
+// ... Help appreciated :)
+
+package arp
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 )
 
-func main() {
+func Table() ArpTable {
 	data, err := exec.Command("arp", "-an").Output()
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
+	var table = make(ArpTable)
 	for _, line := range strings.Split(string(data), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) < 3 {
@@ -22,8 +31,8 @@ func main() {
 		ip := strings.Replace(fields[1], "(", "", -1)
 		ip = strings.Replace(ip, ")", "", -1)
 
-		mac := fields[3]
-		fmt.Println(ip, mac)
+		table[ip] = fields[3]
 	}
 
+	return table
 }
