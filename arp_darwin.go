@@ -31,7 +31,15 @@ func Table() ArpTable {
 		ip := strings.Replace(fields[1], "(", "", -1)
 		ip = strings.Replace(ip, ")", "", -1)
 
-		table[ip] = fields[3]
+		if _, ok := table[ip]; !ok {
+			table[ip] = []ArpTableEntry{}
+		}
+
+		table[ip] = append(table[ip], ArpTableEntry{
+			MAC:  fields[3],
+			Line: line,
+		})
+
 	}
 
 	return table

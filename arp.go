@@ -4,7 +4,12 @@ import (
 	"time"
 )
 
-type ArpTable map[string]string
+type ArpTableEntry struct {
+	MAC  string
+	Line string
+}
+
+type ArpTable map[string][]ArpTableEntry
 
 var (
 	stop     = make(chan struct{})
@@ -45,5 +50,16 @@ func CacheUpdateCount() int {
 // Search looks up the MAC address for an IP address
 // in the arp table
 func Search(ip string) string {
-	return arpCache.Search(ip)
+	macs := arpCache.Search(ip)
+	if len(macs) == 0 {
+		return ""
+	}
+
+	//For reverse compatability, return the last entry
+	return macs[len(macs)-1]
+
+}
+
+func SearchEntries(ip string) []ArpTableEntry {
+	return arpCache.SearchEntries(ip)
 }

@@ -22,18 +22,39 @@ func (c *cache) Refresh() {
 	c.UpdatedCount += 1
 }
 
-func (c *cache) Search(ip string) string {
+func (c *cache) Search(ip string) []string {
 	c.RLock()
 	defer c.RUnlock()
 
-	mac, ok := c.table[ip]
+	entries, ok := c.table[ip]
 
 	if !ok {
 		c.RUnlock()
 		c.Refresh()
 		c.RLock()
-		mac = c.table[ip]
+		entries = c.table[ip]
 	}
 
-	return mac
+	macs := []string{}
+	for _, entry := range entries {
+		macs = append(macs, entry.MAC)
+	}
+
+	return macs
+}
+
+func (c *cache) SearchEntries(ip string) []ArpTableEntry {
+	c.RLock()
+	defer c.RUnlock()
+
+	entries, ok := c.table[ip]
+
+	if !ok {
+		c.RUnlock()
+		c.Refresh()
+		c.RLock()
+		entries = c.table[ip]
+	}
+
+	return entries
 }

@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package arp
@@ -41,8 +42,16 @@ func Table() ArpTable {
 		}
 
 		ip := fields[0]
-		// Normalize MAC address to colon-separated format
-		table[ip] = strings.Replace(fields[1], "-", ":", -1)
+
+		if _, ok := table[ip]; !ok {
+			table[ip] = []ArpTableEntry{}
+		}
+
+		table[ip] = append(table[ip], ArpTableEntry{
+			MAC:  strings.Replace(fields[1], "-", ":", -1), // Normalize MAC address to colon-separated format
+			Line: line,
+		})
+
 	}
 
 	return table

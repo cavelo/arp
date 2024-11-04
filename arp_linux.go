@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 package arp
@@ -34,7 +35,15 @@ func Table() ArpTable {
 	for s.Scan() {
 		line := s.Text()
 		fields := strings.Fields(line)
-		table[fields[f_IPAddr]] = fields[f_HWAddr]
+
+		if _, ok := table[fields[f_IPAddr]]; !ok {
+			table[fields[f_IPAddr]] = []ArpTableEntry{}
+		}
+
+		table[fields[f_IPAddr]] = append(table[fields[f_IPAddr]], ArpTableEntry{
+			MAC:  fields[f_HWAddr],
+			Line: line,
+		})
 	}
 
 	return table
